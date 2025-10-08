@@ -1,0 +1,36 @@
+strassen --> divide and conquer approach --> divide to 4 sub matrices forall matrices size above 2
+first thing first try to do it on openmp?
+how to do???
+lets say
+A * B = C 2x2
+
+it would be what?
+c11 = a11*b11 + a12*b12
+c12 = a11*b12 + a12*b22
+c21 = a21*b11 + a22*b21
+c22 = a21*b12 + a22*b22
+but this would be expensive --> 8 multiplication 4 addition
+what then??? strassen said that this can be reduced to 7 multiplication
+how?
+defined 7 product M1..7
+A = [a b
+     c d]
+B = [e f
+     g h]
+M1​=(a+d)(e+h)
+​M2​=(c+d)e
+​M3​=a(f−h)
+​M4=d(g−e)
+​M5=(a+b)h
+​M6=(c−a)(e+f)
+​M7=(b−d)(g+h)​
+C = [
+     M1 + M4 - M5 + M7 | M3 + M5
+     M2 +  M4 | M1 + M3 - M2 + M6
+]
+*** do note that we need to pad if size of array is not a power of 2
+mpi + openmp hybrid
+openmp >> mpi 
+mpi --> chia task 
+openmp --> do the calc
+
