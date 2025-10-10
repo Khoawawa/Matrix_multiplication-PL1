@@ -52,6 +52,7 @@
         "xmemory": "cpp",
         "xtr1common": "cpp",
         "algorithm": "cpp",
-        "optional": "cpp"
+        "optional": "cpp",
+        "random": "cpp"
     }
 }
