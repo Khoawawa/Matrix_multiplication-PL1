@@ -10,5 +10,7 @@ int main(){
         std::cout << "Matrix " << i << ": " << std::endl;
         split[i].printMatrix();
     }
+    MatrixView<int> A_view = A.view();
+    A_view.toMatrix().printMatrix();
     return 0;
 }

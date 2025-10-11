@@ -4,6 +4,8 @@
 #include <iostream>
 #include <algorithm>
 template<typename T>
+class Matrix;
+template<typename T>
 class MatrixView{
 public:
     T* data; // this should point to the start of the view
@@ -12,10 +14,12 @@ public:
     MatrixView(T* data, int n, int stride) : data(data), n(n), stride(stride) {}
     T& at(int i, int j); // everything view related should be accessed through this
     const T& at(int i, int j) const;
+    Matrix<T> toMatrix();
 };
 
 template<typename T>
 class Matrix{
+    friend class MatrixView<T>; 
 private:
     const int n;
     T* data; // 
@@ -49,4 +53,5 @@ public:
     Matrix<T>* splitQuadrantMatrix();
 };
 #include "Matrix.tpp"
+#include "MatrixView.tpp"
 #endif
