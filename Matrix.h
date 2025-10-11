@@ -38,7 +38,7 @@ public:
     void sub(const MatrixView<T>& A, const MatrixView<T>&B, MatrixView<T> C);
     static void naiveMultiply(const MatrixView<T>& A, const MatrixView<T>& B, MatrixView<T>& C);
     MatrixView<T> view();
-    void strassenMultiply(const MatrixView<T>& A, const MatrixView<T>& B, MatrixView<T>& C);
+    virtual void strassenMultiply(const MatrixView<T>& A, const MatrixView<T>& B, MatrixView<T>& C);
     Matrix<T> operator*(Matrix<T>& B);
     int get_n() const;
     T& get(int i, int j) const;
