@@ -1,6 +1,5 @@
 #include "Matrix.h"
-template <typename T> T& MatrixView<T>::at(int i, int j) { return data[i * stride + j]; }
-template <typename T> const T& MatrixView<T>::at(int i, int j) const { return data[i * stride + j]; }
+
 template <typename T>
 void Matrix<T>::fillMatrix()
 {
