@@ -2,6 +2,7 @@
 #define MATRIX_H
 #include <omp.h>
 #include <iostream>
+#include <algorithm>
 template<typename T>
 class MatrixView{
 public:
@@ -18,6 +19,8 @@ class Matrix{
 private:
     const int n;
     T* data; // 
+protected:
+    get_data() const { return data; }
 public:
     Matrix(int n) : n(n) {
         data = new T[n * n]();
@@ -43,6 +46,7 @@ public:
     int get_n() const;
     T& get(int i, int j) const;
     Matrix<T>& operator=(const Matrix<T>& B);
+    Matrix<T>* splitQuadrantMatrix();
 };
 #include "Matrix.tpp"
 #endif

@@ -296,3 +296,30 @@ Matrix<T> &Matrix<T>::operator=(const Matrix<T> &B)
     }
     return *this;
 }
+template<typename T>
+Matrix<T>* Matrix<T>::splitQuadrantMatrix()
+{
+    int half = this->n / 2;
+    Matrix<T>* ret = new Matrix<T>[4]{
+        Matrix<T>(half),
+        Matrix<T>(half),
+        Matrix<T>(half),
+        Matrix<T>(half)
+    };
+    
+    for (int pos = 0; pos < 4; pos++)
+    {   
+        int row_offset = (pos / 2) * half;
+        int col_offset = (pos % 2) * half;
+        for (int i = 0; i < half; i++)
+        {
+            std::copy(
+                this->data + (row_offset + i) * this-> n + col_offset,
+                this->data + (row_offset + i) * this-> n + col_offset + half,
+                ret[pos].data + i * half
+            );
+        }    
+        
+    }
+    return ret;
+}
