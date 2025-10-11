@@ -6,7 +6,7 @@ class HybridMatrix : public Matrix<T>{
 public:
     HybridMatrix(int n) : Matrix<T>(n) {}
     
-}
+};
 
 
 #endif // HYBRID_MATRIX_H
