@@ -42,7 +42,7 @@ public:
     static Matrix<T> add_matrix(const Matrix<T>& A, const Matrix<T>& B);
     static Matrix<T> sub_matrix(const Matrix<T>& A, const Matrix<T>& B);
     static void sendSubMatrices(MatrixView<T>* A, MatrixView<T>* B, MatrixView<T>* C);
-    static void sendTask(const StrassenTask<T>& task, int dest, MPI_Request reqs[2]);
+    static void sendTask(const StrassenTask<T>& task, int dest);
     static StrassenTask<T> recvTask(int src, int rank);
     void printMatrix(){this->matrix.printMatrix();};
     Matrix<T>& getMatrix(){return this->matrix;}

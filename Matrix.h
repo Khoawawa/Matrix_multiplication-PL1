@@ -54,6 +54,13 @@ public:
     T& get(int i, int j) const;
     Matrix<T>& operator=(const Matrix<T>& B);
     Matrix<T>* splitQuadrantMatrix();
+    bool operator==(const Matrix<T>& B) const {
+        if (this->n != B.n) return false;
+        for (int i = 0; i < n * n; i++) {
+            if (this->data[i] != B.data[i]) return false;
+        }
+        return true;
+    }
 };
 #include "Matrix.tpp"
 #include "MatrixView.tpp"

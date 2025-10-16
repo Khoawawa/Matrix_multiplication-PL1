@@ -39,7 +39,7 @@ Matrix<T> HybridMatrix<T>::operator*(Matrix<T>& B){
     int n = this->matrix.get_n();
     Matrix<T> C(n);
     
-    if (n <= 2){
+    if (n <= 64){
         MatrixView<T> C_view = C.view();
         Matrix<T>::naiveMultiply(this->matrix, B, C_view);
         return C;
@@ -162,10 +162,7 @@ void coordinator(Matrix<T>& A, Matrix<T>& B, Matrix<T>& C, int num_worker, Matri
                 // send the task if there is one
                 StrassenTask<T> task = taskQueue.front();
                 taskQueue.pop();
-                MPI_Request reqs[2];
-                HybridMatrix<T>::sendTask(task, worker, reqs);
-                requests.push_back(reqs[0]);
-                requests.push_back(reqs[1]);
+                HybridMatrix<T>::sendTask(task, worker);
             }
             else{
                 // inform the worker to terminate
@@ -192,14 +189,14 @@ void coordinator(Matrix<T>& A, Matrix<T>& B, Matrix<T>& C, int num_worker, Matri
     delete[] Bs;
 }
 template<typename T>
-void HybridMatrix<T>::sendTask(const StrassenTask<T>& task, int dest, MPI_Request reqs[2]) {
+void HybridMatrix<T>::sendTask(const StrassenTask<T>& task, int dest) {
     MPI_Datatype dtype = get_mpi_data_type<T>();
     MPI_Send(&task.id, 1, MPI_INT, dest, TAG_SEND_ID, MPI_COMM_WORLD);
     int n = task.A_part.get_n();
     MPI_Send(&n, 1, MPI_INT, dest, TAG_SEND_N, MPI_COMM_WORLD);
 
-    MPI_Isend(task.A_part.get_data(), n*n, dtype, dest, TAG_SEND_A_DATA, MPI_COMM_WORLD, &reqs[0]);
-    MPI_Isend(task.B_part.get_data(), n*n, dtype, dest, TAG_SEND_B_DATA, MPI_COMM_WORLD, &reqs[1]);
+    MPI_Send(task.A_part.get_data(), n*n, dtype, dest, TAG_SEND_A_DATA, MPI_COMM_WORLD);
+    MPI_Send(task.B_part.get_data(), n*n, dtype, dest, TAG_SEND_B_DATA, MPI_COMM_WORLD);
 }
 template<typename T>
 StrassenTask<T> HybridMatrix<T>::recvTask(int src, int rank) {

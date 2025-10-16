@@ -4,7 +4,8 @@ int main(int argc, char** argv) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     std::cout << "Process " << rank << " started." << std::endl;
-    HybridMatrix<int> A(4), B(4), C(4);
+    int size = 256;
+    HybridMatrix<int> A(size), B(size), C(size);
     if (rank == 0){
         A.getMatrix().fillMatrix(1);
         B.getMatrix().fillMatrix(2);
@@ -12,7 +13,16 @@ int main(int argc, char** argv) {
     C = A * B.getMatrix();
     
     if (rank == 0) {
-        C.printMatrix();
+        Matrix<int> D = Matrix<int>(size);
+        MatrixView<int> D_view = D.view();
+        
+        Matrix<int>::naiveMultiply(A.getMatrix(), B.getMatrix(), D_view);
+        
+        if (C.getMatrix() == D){
+            std::cout << "Multiplication result is correct." << std::endl;
+        } else {
+            std::cout << "Multiplication result is incorrect!" << std::endl;
+        }
     }
     MPI_Finalize();
     return 0;
