@@ -11,21 +11,24 @@ public:
     T* data; // this should point to the start of the view
     int n; // this should be the size of the view
     int stride; // basically the size of the original matrix --> help w with indexing
+    MatrixView(): data(nullptr), n(0), stride(0) {};
     MatrixView(T* data, int n, int stride) : data(data), n(n), stride(stride) {}
     T& at(int i, int j); // everything view related should be accessed through this
     const T& at(int i, int j) const;
     Matrix<T> toMatrix();
+    int get_n() const { return n; }
 };
 
 template<typename T>
 class Matrix{
     friend class MatrixView<T>; 
 private:
-    const int n;
+    int n;
     T* data; // 
-protected:
-    get_data() const { return data; }
+    
 public:
+    T* get_data() const { return data; }
+    Matrix() : n(0), data(nullptr) {}
     Matrix(int n) : n(n) {
         data = new T[n * n]();
     }
@@ -38,11 +41,11 @@ public:
     }
     void fillMatrix();
     void fillMatrix(T val);
-    void printMatrix();
+    void printMatrix() const;
     operator MatrixView<T>() const;
     operator MatrixView<T>();
-    void add(const MatrixView<T>& A, const MatrixView<T>&B, MatrixView<T> C);
-    void sub(const MatrixView<T>& A, const MatrixView<T>&B, MatrixView<T> C);
+    static void add(const MatrixView<T>& A, const MatrixView<T>&B, MatrixView<T> C);
+    static void sub(const MatrixView<T>& A, const MatrixView<T>&B, MatrixView<T> C);
     static void naiveMultiply(const MatrixView<T>& A, const MatrixView<T>& B, MatrixView<T>& C);
     MatrixView<T> view();
     virtual void strassenMultiply(const MatrixView<T>& A, const MatrixView<T>& B, MatrixView<T>& C);
