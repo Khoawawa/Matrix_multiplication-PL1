@@ -3,14 +3,16 @@
 
 int main(){
     std::cout << "\nStarting Performance Measurement..." << std::endl;
-    int size = 300;
+    int size = 1000;
     Matrix<int> A(size);
     Matrix<int> B(size);
     Matrix<int> C(size);
+    Matrix<int> C_tiled(size);
     
     A.fillMatrix();
     B.fillMatrix();
     C.fillMatrix(0);
+    C_tiled.fillMatrix(0);
 
     //Write matrix A and matrix B to input.txt
     std::cout << "Writing matrices A and B to input.txt..." << std::endl;
@@ -27,12 +29,18 @@ int main(){
 
     Matrix<int>C_copy = Matrix<int>(C);
     MatrixView<int> A_view = A.view(), B_view = B.view(), C_view = C.view(), C_copy_view = C_copy.view();
+    MatrixView<int> C_tiled_view = C_tiled.view();
     
     time_t start_naive = clock();
     Matrix<int>::naiveMultiply(A_view, B_view, C_copy_view);
     time_t end_naive = clock();
     std::cout << "Naive time: " << (double)(end_naive - start_naive) / CLOCKS_PER_SEC << std::endl;
     
+    time_t start_tiled = clock();
+    Matrix<int>::tiledMultiply(A_view, B_view, C_tiled_view);
+    time_t end_tiled = clock();
+    std::cout << "Tiled time: " << (double)(end_tiled - start_tiled) / CLOCKS_PER_SEC << std::endl;
+
     time_t start_strassen = clock();
     C = A * B;
     time_t end_strassen = clock();
@@ -43,6 +51,11 @@ int main(){
     std::cout << "-----------------------------------------" << std::endl;
     std::cout << "Running test correctness for size = " << size << "x" << size << std::endl;
     if (Matrix<int>::areMatricesEqual(C_copy_view, C)) {
+        std::cout << "Result: PASS" << std::endl;
+    } else {
+        std::cout << "Result: FAIL" << std::endl;
+    }
+    if (Matrix<int>::areMatricesEqual(C_copy_view, C_tiled)) {
         std::cout << "Result: PASS" << std::endl;
     } else {
         std::cout << "Result: FAIL" << std::endl;
@@ -67,6 +80,15 @@ int main(){
         std::cout << "Successfully wrote result matrix to outputNaive.txt." << std::endl;
     } else {
         std::cerr << "Error: Unable to open outputNaive.txt for writing." << std::endl;
+    }
+
+    std::ofstream outputFile3("output/outputTiled.txt");
+    if (outputFile3.is_open()) {
+        C_tiled.writeData(outputFile3);
+        outputFile3.close();
+        std::cout << "Successfully wrote result matrix to outputTiled.txt." << std::endl;
+    } else {
+        std::cerr << "Error: Unable to open outputTiled.txt for writing." << std::endl;
     }
     
     

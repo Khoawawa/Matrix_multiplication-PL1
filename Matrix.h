@@ -44,6 +44,7 @@ public:
     void add(const MatrixView<T>& A, const MatrixView<T>&B, MatrixView<T> C);
     void sub(const MatrixView<T>& A, const MatrixView<T>&B, MatrixView<T> C);
     static void naiveMultiply(const MatrixView<T>& A, const MatrixView<T>& B, MatrixView<T>& C);
+    static void tiledMultiply(const MatrixView<T>& A, const MatrixView<T>& B, MatrixView<T>& C);
     MatrixView<T> view();
     virtual void strassenMultiply(const MatrixView<T>& A, const MatrixView<T>& B, MatrixView<T>& C);
     virtual Matrix<T> operator*(Matrix<T>& B);
