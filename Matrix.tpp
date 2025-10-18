@@ -322,3 +322,31 @@ Matrix<T>* Matrix<T>::splitQuadrantMatrix()
     }
     return ret;
 }
+template<typename T>
+bool Matrix<T>::areMatricesEqual(const MatrixView<T>& A, const MatrixView<T>& B, double epsilon) {
+    if (A.n != B.n) {
+        return false;
+    }
+
+    for (int i = 0; i < A.n; ++i) {
+        for (int j = 0; j < A.n; ++j) {
+            if (std::abs(A.at(i, j) - B.at(i, j)) > epsilon) {
+                std::cerr << "Mismatch at (" << i << ", " << j << "): A=" << A.at(i, j) 
+                          << ", B=" << B.at(i, j) << std::endl;
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+template <typename T>
+void Matrix<T>::writeData(std::ostream& os) const {
+    os << n << std::endl;
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            os << data[i * n + j] << (j == n - 1 ? "" : " ");
+        }
+        os << std::endl;
+    }
+}

@@ -51,6 +51,8 @@ public:
     T& get(int i, int j) const;
     Matrix<T>& operator=(const Matrix<T>& B);
     Matrix<T>* splitQuadrantMatrix();
+    static bool areMatricesEqual(const MatrixView<T>& A, const MatrixView<T>& B, double epsilon = 1e-6);
+    void writeData(std::ostream& os) const;
 };
 #include "Matrix.tpp"
 #include "MatrixView.tpp"

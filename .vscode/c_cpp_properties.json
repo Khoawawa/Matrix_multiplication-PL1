@@ -3,7 +3,6 @@
         {
             "name": "Win32",
             "includePath": [
-                "C:\\Program Files (x86)\\Microsoft SDKs\\MPI\\Include",
                 "${workspaceFolder}/**"
             ],
             "defines": [
@@ -12,10 +11,10 @@
                 "_UNICODE"
             ],
             "windowsSdkVersion": "10.0.26100.0",
-            "compilerPath": "cl.exe",
+            "compilerPath": "C:/msys64/ucrt64/bin/gcc.exe",
             "cStandard": "c17",
-            "cppStandard": "c++17",
-            "intelliSenseMode": "windows-msvc-x64"
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "gcc-x64"
         }
     ],
     "version": 4

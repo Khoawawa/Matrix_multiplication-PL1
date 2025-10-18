@@ -1,0 +1,27 @@
+khi thực hiện kiểm tra tính đúng đắn
+
+Sẽ PASS khi kích thước ma trận là lũy thừa của hai 
+Sẽ xảy ra FAIL nếu là trường hợp sau: 300, 500...
+
+Lý do được giải thích dưới đây:
+
+trong hàm strassenMultiply có dòng
+if (A.n <= 64)
+{
+    Matrix<T>::naiveMultiply(A, B, C);
+    return;
+}
+khi chia ma trận còn bé hơn 64 thì áp dụng trực tiếp naiveMultiply
+
+Kích thước = 300:
+300 > 64. Chia đôi -> Kích thước con là 150.
+
+Hàm đệ quy được gọi với n = 150.
+150 > 64. Chia đôi -> Kích thước con là 75.
+
+Hàm đệ quy được gọi với n = 75.
+75 > 64. Thuật toán vẫn tiếp tục chia.
+
+int half = 75 / 2; -> half sẽ bằng 37.
+LỖI XẢY RA Ở ĐÂY. 
+Thuật toán cố gắng chia ma trận 75x75 thành các ma trận con 37x37. Phép chia này bị lỗi, làm mất dữ liệu của hàng và cột cuối cùng, dẫn đến kết quả sai.
