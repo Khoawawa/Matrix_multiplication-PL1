@@ -30,7 +30,7 @@ public:
         data = new T[n * n]();
     }
     Matrix(const Matrix& other) : n(other.n) {
-        data = new int[n * n];
+        data = new T[n * n];
         std::copy(other.data, other.data + n*n, data);
     }
     ~Matrix(){
