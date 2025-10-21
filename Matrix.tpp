@@ -86,41 +86,35 @@ template <typename T>
 void Matrix<T>::cannonMultiply(const MatrixView<T>& A, const MatrixView<T>& B, MatrixView<T>& C)
 {
     const int n = A.n;
-    const int BLOCK_SIZE = 32; // A sensible block size to define task granularity
+    const int BLOCK_SIZE = 32; 
 
     #pragma omp parallel
     {
-        // Have only a single thread generate all the tasks
         #pragma omp single
         {
-            // Iterate over the matrix C in blocks
             for (int bi = 0; bi < n; bi += BLOCK_SIZE) {
                 for (int bj = 0; bj < n; bj += BLOCK_SIZE) {
                     
-                    // Create one task for each block of C
                     #pragma omp task
                     {
-                        // This is the code that each task will execute
-                        // It computes one block of the final matrix C
                         int i_end = std::min(bi + BLOCK_SIZE, n);
                         for (int i = bi; i < i_end; ++i) {
                             int j_end = std::min(bj + BLOCK_SIZE, n);
                             for (int j = bj; j < j_end; ++j) {
+                                
                                 T sum = 0;
-                                // Innermost loop computes the dot product for C[i, j]
+                                
                                 for (int k = 0; k < n; ++k) {
-                                    int a_col = (j + i + k) % n;
-                                    int b_row = (i + j + k) % n;
-                                    sum += A.at(i, a_col) * B.at(b_row, j);
+                                    sum += A.at(i, k) * B.at(k, j);
                                 }
                                 C.at(i, j) = sum;
                             }
                         }
-                    } // End of task
+                    }
                 }
             }
-        } // All tasks have been created by the single thread
-    } // The parallel region implicitly waits for all tasks to complete before ending
+        }
+    }
 }
 
 

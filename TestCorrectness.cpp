@@ -116,7 +116,8 @@ void runFullTestSuite() {
         64,
         66,
         128,
-        130
+        130,
+        1000
     };
     
     for (int size : sizesToTest) {
