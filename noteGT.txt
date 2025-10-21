@@ -1,7 +1,7 @@
 khi thực hiện kiểm tra tính đúng đắn
 
 Sẽ PASS khi kích thước ma trận là lũy thừa của hai 
-Sẽ xảy ra FAIL nếu là trường hợp sau: 300, 500...
+Sẽ xảy ra FAIL nếu là trường hợp sau: 300, 500... số lẻ?
 
 Lý do được giải thích dưới đây:
 

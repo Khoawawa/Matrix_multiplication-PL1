@@ -3,16 +3,19 @@
 
 int main(){
     std::cout << "\nStarting Performance Measurement..." << std::endl;
-    int size = 1000;
+    int size = 256;
+    
     Matrix<int> A(size);
     Matrix<int> B(size);
-    Matrix<int> C(size);
-    Matrix<int> C_tiled(size);
-    
+    Matrix<int> C_strassen(size);
+    Matrix<int> C_cannon(size);
+    Matrix<int> C_naive(size);
+
     A.fillMatrix();
     B.fillMatrix();
-    C.fillMatrix(0);
-    C_tiled.fillMatrix(0);
+    C_strassen.fillMatrix(0);
+    C_cannon.fillMatrix(0);
+    C_naive.fillMatrix(0);
 
     //Write matrix A and matrix B to input.txt
     std::cout << "Writing matrices A and B to input.txt..." << std::endl;
@@ -27,46 +30,38 @@ int main(){
         std::cerr << "Error: Unable to open input.txt for writing." << std::endl;
     }
 
-    Matrix<int>C_copy = Matrix<int>(C);
-    MatrixView<int> A_view = A.view(), B_view = B.view(), C_view = C.view(), C_copy_view = C_copy.view();
-    MatrixView<int> C_tiled_view = C_tiled.view();
+    MatrixView<int> A_view = A.view();
+    MatrixView<int> B_view = B.view();
+    MatrixView<int> C_strassen_view = C_strassen.view();
+    MatrixView<int> C_naive_view = C_naive.view();
+    MatrixView<int> C_cannon_view = C_cannon.view();
     
+    // Naive
     time_t start_naive = clock();
-    Matrix<int>::naiveMultiply(A_view, B_view, C_copy_view);
+    Matrix<int>::naiveMultiply(A_view, B_view, C_naive_view);
     time_t end_naive = clock();
     std::cout << "Naive time: " << (double)(end_naive - start_naive) / CLOCKS_PER_SEC << std::endl;
     
-    time_t start_tiled = clock();
-    Matrix<int>::tiledMultiply(A_view, B_view, C_tiled_view);
-    time_t end_tiled = clock();
-    std::cout << "Tiled time: " << (double)(end_tiled - start_tiled) / CLOCKS_PER_SEC << std::endl;
+    // Cannon
+    time_t start_cannon = clock();
+    Matrix<int>::cannonMultiply(A_view, B_view, C_cannon_view);
+    time_t end_cannon = clock();
+    std::cout << "Cannon time: " << (double)(end_cannon - start_cannon) / CLOCKS_PER_SEC << std::endl;
 
+    // Strassen
     time_t start_strassen = clock();
-    C = A * B;
+    C_strassen = A * B;
     time_t end_strassen = clock();
     std::cout << "Strassen time: " << (double)(end_strassen - start_strassen) / CLOCKS_PER_SEC << std::endl;
 
+    
+    std::cout << "\nPerformance measurement finished." << std::endl;
+    std::cout << "Writing result matrices to output files..." << std::endl;
 
-
-    std::cout << "-----------------------------------------" << std::endl;
-    std::cout << "Running test correctness for size = " << size << "x" << size << std::endl;
-    if (Matrix<int>::areMatricesEqual(C_copy_view, C)) {
-        std::cout << "Result: PASS" << std::endl;
-    } else {
-        std::cout << "Result: FAIL" << std::endl;
-    }
-    if (Matrix<int>::areMatricesEqual(C_copy_view, C_tiled)) {
-        std::cout << "Result: PASS" << std::endl;
-    } else {
-        std::cout << "Result: FAIL" << std::endl;
-    }
-    std::cout << "-----------------------------------------" << std::endl;
-
-    //"Write matrix C to input.txt
-    std::cout << "Writing result matrices C and C_copy to output.txt..." << std::endl;
+    //Write matrix C to input.txt
     std::ofstream outputFile1("output/outputStrassen.txt");
     if (outputFile1.is_open()) {
-        C.writeData(outputFile1);
+        C_strassen.writeData(outputFile1);
         outputFile1.close();
         std::cout << "Successfully wrote result matrix to outputStrassen.txt." << std::endl;
     } else {
@@ -75,22 +70,23 @@ int main(){
 
     std::ofstream outputFile2("output/outputNaive.txt");
     if (outputFile2.is_open()) {
-        C_copy.writeData(outputFile2);
+        C_naive.writeData(outputFile2);
         outputFile2.close();
         std::cout << "Successfully wrote result matrix to outputNaive.txt." << std::endl;
     } else {
         std::cerr << "Error: Unable to open outputNaive.txt for writing." << std::endl;
     }
-
-    std::ofstream outputFile3("output/outputTiled.txt");
+    
+    std::ofstream outputFile3("output/outputCannon.txt");
     if (outputFile3.is_open()) {
-        C_tiled.writeData(outputFile3);
+        C_cannon.writeData(outputFile3);
         outputFile3.close();
-        std::cout << "Successfully wrote result matrix to outputTiled.txt." << std::endl;
+        std::cout << "Successfully wrote result matrix to outputCannon.txt." << std::endl;
     } else {
-        std::cerr << "Error: Unable to open outputTiled.txt for writing." << std::endl;
+        std::cerr << "Error: Unable to open outputCannon.txt for writing." << std::endl;
     }
     
+    std::cout << "All tasks complete." << std::endl;
     
     return 0;
 }

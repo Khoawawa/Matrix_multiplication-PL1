@@ -83,34 +83,47 @@ template <typename T> void Matrix<T>::naiveMultiply(const MatrixView<T> &A, cons
 }
 
 template <typename T>
-void Matrix<T>::tiledMultiply(const MatrixView<T>& A, const MatrixView<T>& B, MatrixView<T>& C)
+void Matrix<T>::cannonMultiply(const MatrixView<T>& A, const MatrixView<T>& B, MatrixView<T>& C)
 {
-    // Kích thước khối (Tile/Block size). 
-    // Đây là một tham số quan trọng có thể điều chỉnh để tối ưu hiệu năng.
-    // Các giá trị 16, 32, 64 thường cho kết quả tốt.
-    const int BLOCK_SIZE = 32;
+    const int n = A.n;
+    const int BLOCK_SIZE = 32; // A sensible block size to define task granularity
 
-    // Song song hóa hai vòng lặp ngoài cùng. Mỗi luồng sẽ xử lý một tập hợp các khối (bi, bj) khác nhau.
-    // collapse(2) gộp hai vòng lặp thành một không gian lặp lớn, giúp phân chia công việc hiệu quả hơn.
-    #pragma omp parallel for collapse(2)
-    for (int bi = 0; bi < A.n; bi += BLOCK_SIZE) {
-        for (int bj = 0; bj < A.n; bj += BLOCK_SIZE) {
-            for (int bk = 0; bk < A.n; bk += BLOCK_SIZE) {
-                // Nhân một khối của A với một khối của B và cộng vào khối của C
-                // Sử dụng std::min để xử lý các ma trận có kích thước không chia hết cho BLOCK_SIZE
-                for (int i = bi; i < std::min(bi + BLOCK_SIZE, A.n); ++i) {
-                    for (int j = bj; j < std::min(bj + BLOCK_SIZE, A.n); ++j) {
-                        T sum = C.at(i, j); // Lấy giá trị hiện tại của C(i,j)
-                        for (int k = bk; k < std::min(bk + BLOCK_SIZE, A.n); ++k) {
-                            sum += A.at(i, k) * B.at(k, j);
+    #pragma omp parallel
+    {
+        // Have only a single thread generate all the tasks
+        #pragma omp single
+        {
+            // Iterate over the matrix C in blocks
+            for (int bi = 0; bi < n; bi += BLOCK_SIZE) {
+                for (int bj = 0; bj < n; bj += BLOCK_SIZE) {
+                    
+                    // Create one task for each block of C
+                    #pragma omp task
+                    {
+                        // This is the code that each task will execute
+                        // It computes one block of the final matrix C
+                        int i_end = std::min(bi + BLOCK_SIZE, n);
+                        for (int i = bi; i < i_end; ++i) {
+                            int j_end = std::min(bj + BLOCK_SIZE, n);
+                            for (int j = bj; j < j_end; ++j) {
+                                T sum = 0;
+                                // Innermost loop computes the dot product for C[i, j]
+                                for (int k = 0; k < n; ++k) {
+                                    int a_col = (j + i + k) % n;
+                                    int b_row = (i + j + k) % n;
+                                    sum += A.at(i, a_col) * B.at(b_row, j);
+                                }
+                                C.at(i, j) = sum;
+                            }
                         }
-                        C.at(i, j) = sum; // Cập nhật lại giá trị cho C(i,j)
-                    }
+                    } // End of task
                 }
             }
-        }
-    }
+        } // All tasks have been created by the single thread
+    } // The parallel region implicitly waits for all tasks to complete before ending
 }
+
+
 
 template <typename T>
 MatrixView<T> Matrix<T>::view()
@@ -369,6 +382,18 @@ bool Matrix<T>::areMatricesEqual(const MatrixView<T>& A, const MatrixView<T>& B,
         }
     }
     return true;
+}
+
+template <typename T>
+void Matrix<T>::createIdentityMatrix()
+{
+    // First, fill the entire matrix with the additive identity (0)
+    this->fillMatrix(static_cast<T>(0));
+    
+    // Then, set the main diagonal to the multiplicative identity (1)
+    for (int i = 0; i < n; ++i) {
+        data[i * n + i] = static_cast<T>(1);
+    }
 }
 
 template <typename T>
