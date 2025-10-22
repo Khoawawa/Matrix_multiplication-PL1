@@ -23,6 +23,11 @@ int main(){
     C = A * B;
     time_t end_strassen = clock();
     std::cout << "Strassen time: " << (double)(end_strassen - start_strassen) / CLOCKS_PER_SEC << std::endl;
+    if (C == C_copy){
+        std::cout << "Multiplication result is correct." << std::endl;
+    } else {
+        std::cout << "Multiplication result is incorrect!" << std::endl;
+    }
     // std::cout << "Matrix C:" << std::endl;
     // C.printMatrix();
     return 0;

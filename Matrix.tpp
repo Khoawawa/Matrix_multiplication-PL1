@@ -23,7 +23,7 @@ void Matrix<T>::fillMatrix(T val)
     }
 }
 template <typename T>
-void Matrix<T>::printMatrix()
+void Matrix<T>::printMatrix() const
 {
     for (int i = 0; i < n; i++)
     {
@@ -126,8 +126,8 @@ void Matrix<T>::strassenMultiply(const MatrixView<T> &A, const MatrixView<T> &B,
         int tid = omp_get_thread_num();
         Matrix<T> ad(half);
         Matrix<T> eh(half);
-        add(a, d, ad);
-        add(e, h, eh);
+        Matrix::add(a, d, ad);
+        Matrix::add(e, h, eh);
         this->strassenMultiply(ad, eh, m1_view);
         // std::cout << "[Thread " << tid << "] << M1 computed" << std::endl;
     }
@@ -138,7 +138,7 @@ void Matrix<T>::strassenMultiply(const MatrixView<T> &A, const MatrixView<T> &B,
     {
         int tid = omp_get_thread_num();
         Matrix<T> cd(half);
-        add(c, d, cd);
+        Matrix::add(c, d, cd);
         this->strassenMultiply(cd, e, m2_view);
         // std::cout << "[Thread " << tid << "] << M2 computed" << std::endl;
     }
@@ -149,7 +149,7 @@ void Matrix<T>::strassenMultiply(const MatrixView<T> &A, const MatrixView<T> &B,
     {
         int tid = omp_get_thread_num();
         Matrix<T> fh(half);
-        sub(f, h, fh);
+        Matrix::sub(f, h, fh);
         this->strassenMultiply(a, fh, m3_view);
         // std::cout << "[Thread " << tid << "] << M3 computed" << std::endl;
     }
@@ -160,7 +160,7 @@ void Matrix<T>::strassenMultiply(const MatrixView<T> &A, const MatrixView<T> &B,
     {
         int tid = omp_get_thread_num();
         Matrix<T> ge(half);
-        sub(g, e, ge);
+        Matrix::sub(g, e, ge);
         this->strassenMultiply(d, ge, m4_view);
         // std::cout << "[Thread " << tid << "] << M4 computed" << std::endl;
     }
@@ -171,7 +171,7 @@ void Matrix<T>::strassenMultiply(const MatrixView<T> &A, const MatrixView<T> &B,
     {
         int tid = omp_get_thread_num();
         Matrix<T> ab(half);
-        add(a, b, ab);
+        Matrix::add(a, b, ab);
         this->strassenMultiply(ab, h, m5_view);
         // std::cout << "[Thread " << tid << "] << M5 computed" << std::endl;
     }
@@ -182,8 +182,8 @@ void Matrix<T>::strassenMultiply(const MatrixView<T> &A, const MatrixView<T> &B,
     {
         int tid = omp_get_thread_num();
         Matrix<T> ca(half), ef(half);
-        sub(c, a, ca);
-        add(e, f, ef);
+        Matrix::sub(c, a, ca);
+        Matrix::add(e, f, ef);
         this->strassenMultiply(ca, ef, m6_view);
         // std::cout << "[Thread " << tid << "] << M6 computed" << std::endl;
     }
@@ -194,8 +194,8 @@ void Matrix<T>::strassenMultiply(const MatrixView<T> &A, const MatrixView<T> &B,
     {
         int tid = omp_get_thread_num();
         Matrix<T> bd(half), gh(half);
-        sub(b, d, bd);
-        add(g, h, gh);
+        Matrix::sub(b, d, bd);
+        Matrix::add(g, h, gh);
         this->strassenMultiply(bd, gh, m7_view);
         // std::cout << "[Thread " << tid << "] << M7 computed" << std::endl;
     }
@@ -220,17 +220,17 @@ void Matrix<T>::strassenMultiply(const MatrixView<T> &A, const MatrixView<T> &B,
     // C21 = M2 + M4
     // C22 = M1 + M3 - M2 + M6
     Matrix<T> m14(half), m145(half);
-    add(m1, m4, m14);
-    sub(m14, m5, m145);
-    add(m145, m7, c11);
+    Matrix<T>::add(m1, m4, m14);
+    Matrix<T>::sub(m14, m5, m145);
+    Matrix<T>::add(m145, m7, c11);
 
-    add(m3, m5, c12);
-    add(m2, m4, c21);
+    Matrix<T>::add(m3, m5, c12);
+    Matrix<T>::add(m2, m4, c21);
 
     Matrix<T> m13(half), m132(half);
-    add(m1, m3, m13);
-    sub(m13, m2, m132);
-    add(m132, m6, c22);
+    Matrix<T>::add(m1, m3, m13);
+    Matrix<T>::sub(m13, m2, m132);
+    Matrix<T>::add(m132, m6, c22);
     // #pragma omp task
     // {
     //     Matrix<T> m14(half), m145(half);
