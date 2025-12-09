@@ -12,6 +12,7 @@ public:
     int n; // this should be the size of the view
     int stride; // basically the size of the original matrix --> help w with indexing
     MatrixView(): data(nullptr), n(0), stride(0) {};
+    ~MatrixView(){data = nullptr;};
     MatrixView(T* data, int n, int stride) : data(data), n(n), stride(stride) {}
     T& at(int i, int j); // everything view related should be accessed through this
     const T& at(int i, int j) const;

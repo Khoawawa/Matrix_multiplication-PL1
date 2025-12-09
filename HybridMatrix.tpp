@@ -77,6 +77,8 @@ Matrix<T> HybridMatrix<T>::operator*(Matrix<T>& B){
         Matrix<T>::add(Ms[0], Ms[2], m13);
         Matrix<T>::sub(m13, Ms[1], m132);
         Matrix<T>::add(m132, Ms[5], C_views[3]);
+
+        delete [] C_views;
     }
     else{
         worker<T>(rank);
