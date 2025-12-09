@@ -3,8 +3,11 @@ int main(int argc, char** argv) {
     MPI_Init(&argc, &argv);
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    std::cout << "Process " << rank << " started." << std::endl;
-    int size = 256;
+    #pragma omp parallel
+{
+    printf("Rank %d, Thread %d\n", rank, omp_get_thread_num());
+}
+    int size = 1000;
     HybridMatrix<int> A(size), B(size), C(size);
     if (rank == 0){
         A.getMatrix().fillMatrix(1);

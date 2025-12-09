@@ -279,15 +279,17 @@ template <typename T>
 T &Matrix<T>::get(int i, int j) const { return data[i * n + j]; }
 
 template <typename T>
-Matrix<T> &Matrix<T>::operator=(const Matrix<T> &B)
+Matrix<T>& Matrix<T>::operator=(const Matrix<T>& B)
 {
     if (this != &B)
-    { // Check for self-assignment
+    {
         if (n != B.n)
         {
-            throw std::invalid_argument("Cannot assign matrices of different sizes");
+            delete[] data;              // free old buffer
+            n = B.n;                    // resize
+            data = new T[n * n];        // allocate new buffer
         }
-        std::copy(B.data, B.data + n * n, this->data); // Deep copy
+        std::copy(B.data, B.data + n * n, data);
     }
     return *this;
 }
