@@ -84,7 +84,7 @@ template <typename T> void naiveMultiplyMP(const MatrixView<T> &A, const MatrixV
 }
 
 template <typename T> void strassenMP(const MatrixView<T> &A, const MatrixView<T> &B, MatrixView<T> &C) {
-    if (A.n <= 32) {
+    if (A.n <= 128) {
         naiveMultiplyMP(A,B,C);
         return;
     }
@@ -207,95 +207,159 @@ template <typename T> void strassenMP(const MatrixView<T> &A, const MatrixView<T
 
 }
 
-int main(int argc, char* argv[]) {
-    if (argc < 2) {
-        std::cerr << "Error: Please Input N" << std::endl;
-        return 1; 
+// Hàm hỗ trợ: Tìm lũy thừa của 2 lớn hơn hoặc bằng n
+int getNextPowerOfTwo(int n) {
+    int power = 1;
+    while (power < n) {
+        power *= 2;
     }
-    const int N = atoi(argv[1]);
-    if (N <= 0) {
-        std::cerr << "Error: N must be positive" << std::endl;
-        return 1;
+    return power;
+}
+
+// Hàm Wrapper: Xử lý Padding trước khi gọi Strassen
+template <typename T>
+void strassenWithPadding(const MatrixView<T>& A, const MatrixView<T>& B, MatrixView<T>& C) {
+    int n = A.n;
+    int m = getNextPowerOfTwo(n);
+
+    // Nếu n đã là lũy thừa của 2, chạy trực tiếp không cần padding
+    if (n == m) {
+        strassenMP(A, B, C);
+        return;
     }
 
-    srand(time(NULL));
-    std::cout << "Creating matrices A, B, C" << std::endl;
-    Matrix<double>* A = new Matrix<double>(N);
-    Matrix<double>* B = new Matrix<double>(N);
-    Matrix<double>* C = new Matrix<double>(N);
-    Matrix<double>* C_Strassen_Free = new Matrix<double>(N);
-    Matrix<double>* C_Strassen_Class = new Matrix<double>(N);
-    A->fillMatrix(); 
-    B->fillMatrix();
-    MatrixView<double> viewA = A->view();
-    MatrixView<double> viewB = B->view();
-    MatrixView<double> viewC = C->view();
-    MatrixView<double> viewC_Free = C_Strassen_Free->view();
+    // 1. Cấp phát ma trận đệm (Padded Matrices) kích thước m x m
+    Matrix<T> APad(m);
+    Matrix<T> BPad(m);
+    Matrix<T> CPad(m);
     
-    // -----Naive-------
-    std::cout << "\n--- Running Naive ---" << std::endl;
-    double start_time = omp_get_wtime();
-    naiveMultiplyMP(viewA, viewB, viewC);
-    double end_time = omp_get_wtime();
-    double time_taken = end_time - start_time;
-    std::cout << "Time Taken (Naive): " << time_taken << " seconds" << std::endl;
+    MatrixView<T> viewAPad = APad.view();
+    MatrixView<T> viewBPad = BPad.view();
+    MatrixView<T> viewCPad = CPad.view();
 
-    if (N <= 10) {
-        std::cout << "--- Matrix A ---" << std::endl;
-        A->printMatrix();
-        std::cout << "--- Matrix B ---" << std::endl;
-        B->printMatrix();
-        std::cout << "--- Result Matrix C ---" << std::endl;
-        C->printMatrix();
+    // 2. Copy dữ liệu từ A, B sang APad, BPad và điền số 0 vào phần thừa
+    // Sử dụng OpenMP để tăng tốc độ copy
+    #pragma omp parallel for collapse(2)
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < m; j++) {
+            if (i < n && j < n) {
+                viewAPad.at(i, j) = A.at(i, j);
+                viewBPad.at(i, j) = B.at(i, j);
+            } else {
+                viewAPad.at(i, j) = 0;
+                viewBPad.at(i, j) = 0;
+            }
+            viewCPad.at(i, j) = 0; // Khởi tạo CPad
+        }
     }
 
-    // -----StrassenMP------
-    std::cout << "\n--- Running strassenMP (My Function) ---" << std::endl;
-    double start_time_free = omp_get_wtime();
+    // 3. Gọi thuật toán Strassen gốc trên ma trận đã padding (kích thước m x m)
     #pragma omp parallel
     {
         #pragma omp single
         {
-            strassenMP(viewA, viewB, viewC_Free);
+            strassenMP(viewAPad, viewBPad, viewCPad);
         }
     }
-    double end_time_free = omp_get_wtime();
-    double time_free = end_time_free - start_time_free;
-    std::cout << "Time Taken (strassenMP): " << time_free << " seconds" << std::endl;
 
-    // ----- Strassen Class-----
-    std::cout << "\n--- Running Matrix::operator* (Class Strassen) ---" << std::endl;
-    double start_time_class = omp_get_wtime();
-    // Gọi toán tử * (dựa trên code Matrix.tpp [cite: 72])
-    *C_Strassen_Class = (*A) * (*B); 
-    double end_time_class = omp_get_wtime();
-    double time_class = end_time_class - start_time_class;
-    std::cout << "Time Taken (Class Strassen): " << time_class << " seconds" << std::endl;
-
-
-    std::cout << "\n--- Verification ---" << std::endl;
-    bool test1 = compareMatrices(*C, *C_Strassen_Free);
-    bool test2 = compareMatrices(*C, *C_Strassen_Class);
-    bool test3 = compareMatrices(*C_Strassen_Free, *C_Strassen_Class);
-
-    std::cout << "Naive vs. strassenMP (Free): " << (test1 ? "SUCCESS" : "FAILURE") << std::endl;
-    std::cout << "Naive vs. Class Strassen:    " << (test2 ? "SUCCESS" : "FAILURE") << std::endl;
-    std::cout << "My Strassen vs. Class Strassen:    " << (test3 ? "SUCCESS" : "FAILURE") << std::endl;
-
-    if (!test1 || !test2 || !test3) {
-        std::cout << "Error: Results do not match!" << std::endl;
-    } else {
-        std::cout << "All results match." << std::endl;
+    #pragma omp parallel for collapse(2)
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            C.at(i, j) = viewCPad.at(i, j);
+        }
     }
-
-    saveMatrixToFile(*A, "A.txt");
-    saveMatrixToFile(*B, "B.txt");
-    saveMatrixToFile(*C, "C.txt");
-    saveMatrixToFile(*C_Strassen_Free, "C_Strassen_Free.txt");
-    saveMatrixToFile(*C_Strassen_Class, "C_Strassen_Class.txt");
-
-    delete A;
-    delete B;
-    delete C;
-    return 0;
 }
+
+
+// int main(int argc, char* argv[]) {
+//     if (argc < 2) {
+//         std::cerr << "Error: Please Input N" << std::endl;
+//         return 1; 
+//     }
+//     const int N = atoi(argv[1]);
+//     if (N <= 0) {
+//         std::cerr << "Error: N must be positive" << std::endl;
+//         return 1;
+//     }
+
+//     srand(time(NULL));
+//     std::cout << "Creating matrices A, B, C" << std::endl;
+//     Matrix<double>* A = new Matrix<double>(N);
+//     Matrix<double>* B = new Matrix<double>(N);
+//     Matrix<double>* C = new Matrix<double>(N);
+//     Matrix<double>* C_Strassen_Free = new Matrix<double>(N);
+//     Matrix<double>* C_Strassen_Class = new Matrix<double>(N);
+//     A->fillMatrix(); 
+//     B->fillMatrix();
+//     MatrixView<double> viewA = A->view();
+//     MatrixView<double> viewB = B->view();
+//     MatrixView<double> viewC = C->view();
+//     MatrixView<double> viewC_Free = C_Strassen_Free->view();
+    
+//     // -----Naive-------
+//     std::cout << "\n--- Running Naive ---" << std::endl;
+//     double start_time = omp_get_wtime();
+//     naiveMultiplyMP(viewA, viewB, viewC);
+//     double end_time = omp_get_wtime();
+//     double time_taken = end_time - start_time;
+//     std::cout << "Time Taken (Naive): " << time_taken << " seconds" << std::endl;
+
+//     if (N <= 10) {
+//         std::cout << "--- Matrix A ---" << std::endl;
+//         A->printMatrix();
+//         std::cout << "--- Matrix B ---" << std::endl;
+//         B->printMatrix();
+//         std::cout << "--- Result Matrix C ---" << std::endl;
+//         C->printMatrix();
+//     }
+
+//     // -----StrassenMP------
+//     std::cout << "\n--- Running strassenMP (My Function) ---" << std::endl;
+//     double start_time_free = omp_get_wtime();
+//     #pragma omp parallel
+//     {
+//         #pragma omp single
+//         {
+//             strassenMP(viewA, viewB, viewC_Free);
+//         }
+//     }
+//     double end_time_free = omp_get_wtime();
+//     double time_free = end_time_free - start_time_free;
+//     std::cout << "Time Taken (strassenMP): " << time_free << " seconds" << std::endl;
+
+//     // ----- Strassen Class-----
+//     std::cout << "\n--- Running Matrix::operator* (Class Strassen) ---" << std::endl;
+//     double start_time_class = omp_get_wtime();
+//     // Gọi toán tử * (dựa trên code Matrix.tpp [cite: 72])
+//     *C_Strassen_Class = (*A) * (*B); 
+//     double end_time_class = omp_get_wtime();
+//     double time_class = end_time_class - start_time_class;
+//     std::cout << "Time Taken (Class Strassen): " << time_class << " seconds" << std::endl;
+
+
+//     std::cout << "\n--- Verification ---" << std::endl;
+//     bool test1 = compareMatrices(*C, *C_Strassen_Free);
+//     bool test2 = compareMatrices(*C, *C_Strassen_Class);
+//     bool test3 = compareMatrices(*C_Strassen_Free, *C_Strassen_Class);
+
+//     std::cout << "Naive vs. strassenMP (Free): " << (test1 ? "SUCCESS" : "FAILURE") << std::endl;
+//     std::cout << "Naive vs. Class Strassen:    " << (test2 ? "SUCCESS" : "FAILURE") << std::endl;
+//     std::cout << "My Strassen vs. Class Strassen:    " << (test3 ? "SUCCESS" : "FAILURE") << std::endl;
+
+//     if (!test1 || !test2 || !test3) {
+//         std::cout << "Error: Results do not match!" << std::endl;
+//     } else {
+//         std::cout << "All results match." << std::endl;
+//     }
+
+//     saveMatrixToFile(*A, "A.txt");
+//     saveMatrixToFile(*B, "B.txt");
+//     saveMatrixToFile(*C, "C.txt");
+//     saveMatrixToFile(*C_Strassen_Free, "C_Strassen_Free.txt");
+//     saveMatrixToFile(*C_Strassen_Class, "C_Strassen_Class.txt");
+
+//     delete A;
+//     delete B;
+//     delete C;
+//     return 0;
+// }
