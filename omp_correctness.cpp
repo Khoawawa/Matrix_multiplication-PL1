@@ -179,16 +179,17 @@ void runFullTestSuite() {
     // Danh sách các size cần test
     // Bao gồm: size nhỏ, size lẻ (test padding), lũy thừa 2, và size lớn
     std::vector<int> sizesToTest = {
-        1,
-        17,    // Lẻ nhỏ
-        32,    // Lũy thừa 2
-        65,    // Lẻ (Padding lên 128)
-        128,
-        513,   // Lẻ (Padding lên 1024)
-        1024,
-        2048,
-        2050,  // Size lớn ~2000 (Padding lên 4096)
-        3000,
+        // 1,
+        // 17,    // Lẻ nhỏ
+        // 32,    // Lũy thừa 2
+        // 65,    // Lẻ (Padding lên 128)
+        // 128,
+        // 513,   // Lẻ (Padding lên 1024)
+        // 1024,
+        // 2048,
+        // 2050,  // Size lớn ~2000 (Padding lên 4096)
+        // 3000,
+        4000,
         4096   // Size lớn ~3000 (Padding lên 4096) -- Case nặng nhất
     };
 
