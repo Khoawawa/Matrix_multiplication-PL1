@@ -41,6 +41,8 @@ public:
     void printMatrix();
     operator MatrixView<T>() const;
     operator MatrixView<T>();
+    Matrix<T> operator+(const Matrix<T>& other) const;
+    Matrix<T> operator-(const Matrix<T>& other) const;
     void add(const MatrixView<T>& A, const MatrixView<T>&B, MatrixView<T> C);
     void sub(const MatrixView<T>& A, const MatrixView<T>&B, MatrixView<T> C);
     static void naiveMultiply(const MatrixView<T>& A, const MatrixView<T>& B, MatrixView<T>& C);
