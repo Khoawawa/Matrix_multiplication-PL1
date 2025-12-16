@@ -24,7 +24,7 @@ private:
     const int n;
     T* data; // 
 protected:
-    get_data() const { return data; }
+    T* get_data() const { return data; }
 public:
     Matrix(int n) : n(n) {
         data = new T[n * n]();
