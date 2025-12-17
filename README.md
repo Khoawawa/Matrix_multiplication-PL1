@@ -54,14 +54,14 @@ Matrix_multiplication-PL1/
 │   ├── Matrix.tpp
 │   ├── Matrix.h
 │   ├── MatrixView.tpp
+│   ├── HybridMatrix.h
+│   ├── HybridMatrix.tpp
 │   └── strassen.h
 ├── sequential.cpp
 ├── omp.cpp
 ├── MPIStrassen.tpp
 ├── MPIStrassen.h
 ├── main_MPI.cpp
-├── HybridMatrix.ypp
-├── HybridMatrix.h
 ├── main_hybrid.cpp
 ├── gpu.cu
 └── README.md
@@ -88,14 +88,14 @@ OMP_NUM_THREADS=16 ./omp
 ### MPI (Run on the provided cluster)
 
 ```bash
-mpicxx -fopenmp main_MPI.cpp -o main_MPI
+mpicxx -fopenmp -Iinclude main_MPI.cpp -o main_MPI
 mpirun -np 24 --hostfile host.txt ./main_MPI
 ```
 
 ### Hybrid OpenMP + MPI (Run on the provided cluster)
 
 ```bash
-mpicxx -fopenmp main_hybrid.cpp -o main_hybrid
+mpicxx -fopenmp -Iinclude main_hybrid.cpp -o main_hybrid
 OMP_NUM_THREADS=8 mpirun -np 24 --hostfile host.txt ./main_hybrid
 ```
 
