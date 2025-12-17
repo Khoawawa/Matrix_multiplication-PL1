@@ -12,6 +12,7 @@ public:
     int n; // this should be the size of the view
     int stride; // basically the size of the original matrix --> help w with indexing
     MatrixView(): data(nullptr), n(0), stride(0) {};
+    ~MatrixView(){data = nullptr;};
     MatrixView(T* data, int n, int stride) : data(data), n(n), stride(stride) {}
     T& at(int i, int j); // everything view related should be accessed through this
     const T& at(int i, int j) const;
@@ -53,6 +54,32 @@ public:
     virtual Matrix<T> operator*(Matrix<T>& B);
     int get_n() const;
     T& get(int i, int j) const;
+    void set(int i, int j, T val){
+        data[i * n + j] = val;
+    }
+    static int next_power_of_two(int x) {
+        if (x <= 1) return 1;
+        int p = 1;
+        while (p < x) p <<= 1;
+        return p;
+    }
+    static Matrix<T> pad(const Matrix<T>& M, int new_n) {
+        Matrix<T> P(new_n);
+        
+        for (int r = 0; r < M.get_n(); ++r)
+        for (int c = 0; c < M.get_n(); ++c)
+            P.set(r, c, M.get(r, c));
+        // std::cout << "Finished padding" << std::endl;
+        return P;
+
+    }
+    static Matrix<T> unpad(const Matrix<T>& P, int old_n) {
+        Matrix<T> M(old_n);
+        for (int r = 0; r < old_n; ++r)
+        for (int c = 0; c < old_n; ++c)
+            M.set(r, c, P.get(r, c));
+        return M;
+    }
     Matrix<T>& operator=(const Matrix<T>& B);
     Matrix<T>* splitQuadrantMatrix();
     bool operator==(const Matrix<T>& B) const {

@@ -37,9 +37,9 @@ Matrix<T> HybridMatrix<T>::ompStrassenMult(const MatrixView<T>& A, const MatrixV
 template<typename T>
 Matrix<T> HybridMatrix<T>::operator*(Matrix<T>& B){
     int n = this->matrix.get_n();
-    Matrix<T> C(n);
     
     if (n <= 64){
+        Matrix<T> C(n);
         MatrixView<T> C_view = C.view();
         Matrix<T>::naiveMultiply(this->matrix, B, C_view);
         return C;
@@ -47,10 +47,32 @@ Matrix<T> HybridMatrix<T>::operator*(Matrix<T>& B){
     int rank, size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
-
     if(rank == 0){
+        // pad if needed
+        Matrix<T> A_work, B_work, C;
+        int n = this->matrix.get_n();
+        int padded_n = Matrix<T>::next_power_of_two(n);
+        bool padded = false;
+        std::cout << padded_n << std::endl;
+        if (padded_n != n){
+            padded = true;
+            A_work = Matrix<T>::pad(this->matrix, padded_n);
+            // std::cout << "Finished padding" << std::endl;
+            B_work = Matrix<T>::pad(B, padded_n);
+            C = Matrix<T>(padded_n);
+        }
+        else{
+            A_work = this->matrix;
+            B_work = B;
+            C = Matrix<T>(n);
+        }
+        
         // setup
         int half = n / 2;
+        if (padded){
+            half = padded_n / 2;
+        }
+        std::cout<< half << std::endl;
         Matrix<T> * Ms = new Matrix<T>[7]{
             Matrix<T>(half),
             Matrix<T>(half),
@@ -61,7 +83,8 @@ Matrix<T> HybridMatrix<T>::operator*(Matrix<T>& B){
             Matrix<T>(half)
         };
         // start spreading tasks
-        coordinator<T>(this->matrix,B,C,size-1, Ms);
+        
+        coordinator<T>(A_work,B_work,C,size-1, Ms);
         // gather results
         MatrixView<T>* C_views = HybridMatrix<T>::splitMatrix4View(C);
         //sequential again
@@ -77,11 +100,19 @@ Matrix<T> HybridMatrix<T>::operator*(Matrix<T>& B){
         Matrix<T>::add(Ms[0], Ms[2], m13);
         Matrix<T>::sub(m13, Ms[1], m132);
         Matrix<T>::add(m132, Ms[5], C_views[3]);
+
+        delete [] C_views;
+
+        if (padded){
+            Matrix<T> C_padded = Matrix<T>::unpad(C, n);
+            return C_padded;
+        }
+        return C;
     }
     else{
         worker<T>(rank);
     }
-    return C;
+    return Matrix<T>(0);
 }
 template <typename T>
 Matrix<T> HybridMatrix<T>::add_matrix(const Matrix<T>& A, const Matrix<T>& B){

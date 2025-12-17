@@ -123,7 +123,6 @@ void Matrix<T>::strassenMultiply(const MatrixView<T> &A, const MatrixView<T> &B,
     MatrixView<T> m1_view = m1.view();
 #pragma omp task
     {
-        int tid = omp_get_thread_num();
         Matrix<T> ad(half);
         Matrix<T> eh(half);
         Matrix::add(a, d, ad);
@@ -136,7 +135,6 @@ void Matrix<T>::strassenMultiply(const MatrixView<T> &A, const MatrixView<T> &B,
     MatrixView<T> m2_view = m2.view();
 #pragma omp task
     {
-        int tid = omp_get_thread_num();
         Matrix<T> cd(half);
         Matrix::add(c, d, cd);
         this->strassenMultiply(cd, e, m2_view);
@@ -147,7 +145,6 @@ void Matrix<T>::strassenMultiply(const MatrixView<T> &A, const MatrixView<T> &B,
     MatrixView<T> m3_view = m3.view();
 #pragma omp task
     {
-        int tid = omp_get_thread_num();
         Matrix<T> fh(half);
         Matrix::sub(f, h, fh);
         this->strassenMultiply(a, fh, m3_view);
@@ -158,7 +155,6 @@ void Matrix<T>::strassenMultiply(const MatrixView<T> &A, const MatrixView<T> &B,
     MatrixView<T> m4_view = m4.view();
 #pragma omp task
     {
-        int tid = omp_get_thread_num();
         Matrix<T> ge(half);
         Matrix::sub(g, e, ge);
         this->strassenMultiply(d, ge, m4_view);
@@ -169,7 +165,7 @@ void Matrix<T>::strassenMultiply(const MatrixView<T> &A, const MatrixView<T> &B,
     MatrixView<T> m5_view = m5.view();
 #pragma omp task
     {
-        int tid = omp_get_thread_num();
+
         Matrix<T> ab(half);
         Matrix::add(a, b, ab);
         this->strassenMultiply(ab, h, m5_view);
@@ -180,7 +176,7 @@ void Matrix<T>::strassenMultiply(const MatrixView<T> &A, const MatrixView<T> &B,
     MatrixView<T> m6_view = m6.view();
 #pragma omp task
     {
-        int tid = omp_get_thread_num();
+
         Matrix<T> ca(half), ef(half);
         Matrix::sub(c, a, ca);
         Matrix::add(e, f, ef);
@@ -192,7 +188,7 @@ void Matrix<T>::strassenMultiply(const MatrixView<T> &A, const MatrixView<T> &B,
     MatrixView<T> m7_view = m7.view();
 #pragma omp task
     {
-        int tid = omp_get_thread_num();
+
         Matrix<T> bd(half), gh(half);
         Matrix::sub(b, d, bd);
         Matrix::add(g, h, gh);
@@ -283,15 +279,17 @@ template <typename T>
 T &Matrix<T>::get(int i, int j) const { return data[i * n + j]; }
 
 template <typename T>
-Matrix<T> &Matrix<T>::operator=(const Matrix<T> &B)
+Matrix<T>& Matrix<T>::operator=(const Matrix<T>& B)
 {
     if (this != &B)
-    { // Check for self-assignment
+    {
         if (n != B.n)
         {
-            throw std::invalid_argument("Cannot assign matrices of different sizes");
+            delete[] data;              // free old buffer
+            n = B.n;                    // resize
+            data = new T[n * n];        // allocate new buffer
         }
-        std::copy(B.data, B.data + n * n, this->data); // Deep copy
+        std::copy(B.data, B.data + n * n, data);
     }
     return *this;
 }
