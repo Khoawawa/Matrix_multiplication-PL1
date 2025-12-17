@@ -1,7 +1,6 @@
 #include <bits/stdc++.h>
 #include "Matrix.h"
 
-// Hàm tìm lũy thừa của 2 tiếp theo
 int next_power_of_2(int n) {
     int p = 1;
     while (p < n) {
@@ -10,8 +9,6 @@ int next_power_of_2(int n) {
     return p;
 }
 
-// Naive sequential matrix multiplication (Giữ nguyên)
-// Hàm hỗ trợ so sánh 2 ma trận
 template<typename T>
 bool compareMatrices(const Matrix<T>& A, const Matrix<T>& B, double epsilon = 1e-4) {
     if (A.get_n() != B.get_n()) {
@@ -31,7 +28,6 @@ bool compareMatrices(const Matrix<T>& A, const Matrix<T>& B, double epsilon = 1e
     return true;
 }
 
-// Naive sequential matrix multiplication
 template<typename T>
 Matrix<T> naive(const Matrix<T>& A, const Matrix<T>& B) {
     int n = A.get_n();
@@ -152,7 +148,6 @@ int main() {
 
     Matrix<float> A(n), B(n);
 
-    // Fill matrices with random numbers
     A.fillMatrix();
     B.fillMatrix();
 
@@ -163,14 +158,12 @@ int main() {
     double time_naive = double(end - start) / double(CLOCKS_PER_SEC);
     std::cout << "\nSequential Naive Runtime:   " << std::fixed << std::setprecision(6) << time_naive << " seconds\n";
 
-    // 2. Multiply using Strassen algorithm
     start = clock();
     auto D = strassen(A, B);
     end = clock();
     double time_strassen = double(end - start) / double(CLOCKS_PER_SEC);
     std::cout << "Sequential Strassen Runtime: " << std::fixed << std::setprecision(6) << time_strassen << " seconds\n";
 
-    // 3. Compare results
     std::cout << "\n---------------------------------\n";
     std::cout << "Verifying correctness...\n";
     if (compareMatrices(C, D)) {
