@@ -25,7 +25,6 @@ class Matrix{
 private:
     int n;
     T* data; // 
-    
 public:
     T* get_data() const { return data; }
     Matrix() : n(0), data(nullptr) {}
@@ -33,7 +32,7 @@ public:
         data = new T[n * n]();
     }
     Matrix(const Matrix& other) : n(other.n) {
-        data = new int[n * n];
+        data = new T[n * n];
         std::copy(other.data, other.data + n*n, data);
     }
     ~Matrix(){
@@ -44,8 +43,15 @@ public:
     void printMatrix() const;
     operator MatrixView<T>() const;
     operator MatrixView<T>();
+<<<<<<< HEAD
     static void add(const MatrixView<T>& A, const MatrixView<T>&B, MatrixView<T> C);
     static void sub(const MatrixView<T>& A, const MatrixView<T>&B, MatrixView<T> C);
+=======
+    Matrix<T> operator+(const Matrix<T>& other) const;
+    Matrix<T> operator-(const Matrix<T>& other) const;
+    void add(const MatrixView<T>& A, const MatrixView<T>&B, MatrixView<T> C);
+    void sub(const MatrixView<T>& A, const MatrixView<T>&B, MatrixView<T> C);
+>>>>>>> omp
     static void naiveMultiply(const MatrixView<T>& A, const MatrixView<T>& B, MatrixView<T>& C);
     MatrixView<T> view();
     virtual void strassenMultiply(const MatrixView<T>& A, const MatrixView<T>& B, MatrixView<T>& C);

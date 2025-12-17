@@ -322,3 +322,22 @@ Matrix<T>* Matrix<T>::splitQuadrantMatrix()
     }
     return ret;
 }
+template <typename T>
+Matrix<T> Matrix<T>::operator+(const Matrix<T>& other) const {
+    // Optional: Check if n == other.n
+    Matrix<T> res(n);
+    for (int i = 0; i < n * n; i++) {
+        res.data[i] = this->data[i] + other.data[i];
+    }
+    return res;
+}
+
+template <typename T>
+Matrix<T> Matrix<T>::operator-(const Matrix<T>& other) const {
+    // Optional: Check if n == other.n
+    Matrix<T> res(n);
+    for (int i = 0; i < n * n; i++) {
+        res.data[i] = this->data[i] - other.data[i];
+    }
+    return res;
+}
