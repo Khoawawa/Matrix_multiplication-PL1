@@ -43,15 +43,10 @@ public:
     void printMatrix() const;
     operator MatrixView<T>() const;
     operator MatrixView<T>();
-<<<<<<< HEAD
-    static void add(const MatrixView<T>& A, const MatrixView<T>&B, MatrixView<T> C);
-    static void sub(const MatrixView<T>& A, const MatrixView<T>&B, MatrixView<T> C);
-=======
     Matrix<T> operator+(const Matrix<T>& other) const;
     Matrix<T> operator-(const Matrix<T>& other) const;
     void add(const MatrixView<T>& A, const MatrixView<T>&B, MatrixView<T> C);
     void sub(const MatrixView<T>& A, const MatrixView<T>&B, MatrixView<T> C);
->>>>>>> omp
     static void naiveMultiply(const MatrixView<T>& A, const MatrixView<T>& B, MatrixView<T>& C);
     MatrixView<T> view();
     virtual void strassenMultiply(const MatrixView<T>& A, const MatrixView<T>& B, MatrixView<T>& C);
