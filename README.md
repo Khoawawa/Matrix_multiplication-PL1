@@ -74,14 +74,14 @@ Matrix_multiplication-PL1/
 ### Sequential
 
 ```bash
-g++ sequential.cpp -o seq
+g++ -fopenmp sequential.cpp -Iinclude -o seq
 ./seq
 ```
 
 ### OpenMP
 
 ```bash
-g++ -fopenmp omp.cpp -o omp
+g++ -fopenmp omp.cpp -Iinclude -o omp
 OMP_NUM_THREADS=16 ./omp
 ```
 
@@ -117,9 +117,4 @@ nvcc -O3 -arch=sm_70 gpu.cu -o gpu
 
 ---
 
-## Contact
-
-- Author: Your Name
-- Email: your.email@example.com
-- GitHub: https://github.com/your-username
 
