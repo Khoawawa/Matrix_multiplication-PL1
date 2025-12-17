@@ -1,4 +1,4 @@
-#include "HybridMatrix.h"
+#include "include/HybridMatrix.h"
 int main(int argc, char** argv) {
     MPI_Init(&argc, &argv);
     int rank;
